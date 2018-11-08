@@ -116,33 +116,52 @@ function calculaFitness(config, populacao){
         //Calcula o fitness -> distancia entre o ponto inicial e o destino
         distancia = pontoFinal - pontoInicial;
         fitness = 100/distancia;//podia ser 1 ao inves de 100, mas os numeros ficariam muito proximos e quebrados
-        popFitness.push([fitness, count]); 
+        popFitness.push(fitness); 
 
         //verifica se o destino veio antes do inicio e corrige
-        if(popFitness[count][0] < 0){
+        if(popFitness[count] < 0){
             populacao[count].reverse();//inverte o individuo para corrigir
-            popFitness[count][0] = popFitness[count][0] * (-1);//deixa o fitness positivo
+            popFitness[count] = popFitness[count] * (-1);//deixa o fitness positivo
         }
     }
     //Implementar o "reorganizar array" para ficar em ordem crescente de fitness
     return popFitness;
 }
-//function organizaPopulacao(populacao, popFitness){
-//    let transicao = populacao;
-//    for(let count = 0; count < populacao.length; count++){
-//        let ind = popFitness[count][1];
-        
-//    }
-//}
+
+function organizaArrays(populacao, popFitness){
+    let transicaoPop = [];
+    let transicaoFit = [];
+    
+    for(let count = 0; count < popFitness.length; count++){
+        transicaoFit.push([popFitness[count], count]);
+    }
+
+    popFitness.sort(function compararNumeros(a, b) {
+        return a - b;
+      });
+      
+    for(count = 0; count < populacao.length; count++){
+        let index;
+        for(let i = 0; i < popFitness.length; i++){
+            if(popFitness[count] === transicaoFit[i][0]){
+                index = i;
+            }
+        }
+        let ind = transicaoFit[index][1];
+        transicaoPop.push(populacao[ind]);
+    }
+    populacao = transicaoPop;   
+}
+
 //Seleção pelo metodo da roleta
 function selecao(populacao, popFitness){
     let somaFitness = 0;
     let selecionados = [];
 
-    //organizaPopulacao(populacao, popFitness);
+    organizaArrays(populacao, popFitness);
 
     for(let count = 0; count < popFitness.length; count++){
-        somaFitness += popFitness[count][0];
+        somaFitness += popFitness[count];
     }
 
     for (count = 0; count < popFitness.length; count++){
@@ -152,7 +171,7 @@ function selecao(populacao, popFitness){
 
         while(aux < posicaoSelecionado){
             selecionados[count] = populacao[posicao];
-            aux += popFitness[posicao][0];
+            aux += popFitness[posicao];
             posicao++;
         }
     }
@@ -161,5 +180,13 @@ function selecao(populacao, popFitness){
 let config = configuraSala(5, 5, [0,0], [4,4]);
 let populacao = geraPopulacao(config, 10);
 let fitness = calculaFitness(config, populacao);
+let selecionados = selecao(populacao, fitness);
+
+console.log("Inicio em: " + config[2] + " - Destino em: " + config[3]);
+console.log("População: ");
+console.log(populacao);
+console.log("Fitness da populacao: ");
 console.log(fitness);
+console.log("Individuos selecionados: ");
+console.log(selecionados);
 
